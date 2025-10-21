@@ -1,0 +1,5 @@
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary mt-3">{{ button_label|default('Guardar') }}</button>
+    <a href="{{ path('app_clase_index') }}" class="btn btn-primary mt-3">Volver</a>
+{{ form_end(form) }}

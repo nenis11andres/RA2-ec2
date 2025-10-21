@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reserva index
+{% endblock %}
+
+{% block body %}
+	<h1>Reserva index</h1>
+
+	<a href="{{ path('app_reserva_new') }}" class="btn btn-primary">Reservar</a>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Usuario</th>
+				<th>Actividad</th>
+				<th>Dia</th>
+				<th>Hora</th>
+				<th>Anular</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for reserva in reservas %}
+        <tr>
+            <td>{{ app.user.username }}</td>
+            <td>{{ reserva.clase ? reserva.clase.actividad.nombre : 'Sin actividad' }}</td>
+            <td>{{ reserva.clase ? reserva.clase.dia : 'Sin día' }}</td>
+            <td>{{ reserva.clase ? reserva.clase.hora : 'Sin hora' }}</td>
+            <td>
+                <form method="post" action="{{ path('app_reserva_delete', {'id': reserva.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reserva.id) }}">
+                    <button class="btn btn-primary">Delete</button>
+                </form>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5">No records found</td>
+        </tr>
+    {% endfor %}
+		</tbody>
+	</table>
+
+
+{% endblock %}

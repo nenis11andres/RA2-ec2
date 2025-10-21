@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Actividad index{% endblock %}
+
+{% block body %}
+    
+
+    <a href="{{ path('app_actividad_new') }}" class="btn btn-primary mt-4">Nueva actividad</a>
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Modificar</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for actividad in actividads %}
+            <tr>
+                <td>{{ actividad.id }}</td>
+                <td>{{ actividad.nombre }}</td>
+                <td>
+                    <a href="{{ path('app_actividad_edit', {'id': actividad.id}) }}" class="btn btn-primary">Modificar</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    
+{% endblock %}

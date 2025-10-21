@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Clase{% endblock %}
+
+{% block body %}
+    <h1>Edit Clase</h1>
+
+    {{ include('clase/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_clase_index') }}">back to list</a>
+
+    {{ include('clase/_delete_form.html.twig') }}
+{% endblock %}

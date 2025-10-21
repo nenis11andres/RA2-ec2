@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Actividad{% endblock %}
+
+{% block body %}
+
+    {{ include('actividad/_form.html.twig', {'button_label': 'Guardar'}) }}
+
+
+    {{ include('actividad/_delete_form.html.twig') }}
+{% endblock %}
