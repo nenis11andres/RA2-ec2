@@ -18,3 +18,5 @@ services:
       - "8081:80"
     volumes:
       - ../gym:/var/www/html
+    # Nombre opcional para acceder más fácil
+    container_name: docker-apache
