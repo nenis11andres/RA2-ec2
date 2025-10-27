@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: ..       # apunta al directorio raíz del repositorio
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ../gym:/var/www/html
+
+  apache:
+    build:
+      context: ..       # apunta al directorio raíz del repositorio
+      dockerfile: docker/apache/Dockerfile
+    ports:
+      - "8081:80"
+    volumes:
+      - ../gym:/var/www/html
