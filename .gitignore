@@ -1,0 +1,25 @@
+# Archivos de estado de Terraform excepto el principal
+*.tfstate.backup
+*.tfstate.*.backup
+
+# Directorios de Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Archivos de variables locales
+*.tfvars
+*.tfvars.json
+
+# Archivos de crash log
+crash.log
+crash.*.log
+
+# Archivos de override
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Archivos de configuración de CLI
+.terraformrc
+terraform.rc

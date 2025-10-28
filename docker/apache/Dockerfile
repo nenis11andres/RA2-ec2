@@ -6,17 +6,26 @@ RUN apt-get update && \
     apt-get install -y apache2 php libapache2-mod-php php-mbstring php-xml php-pdo php-mysql unzip curl git && \
     apt-get clean
 
+# Instalar Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 # Habilitar mod_rewrite para Symfony
 RUN a2enmod rewrite
 
-# Copiar proyecto Symfony completo, incluyendo archivos ocultos (.htaccess)
-COPY gym/. /var/www/html/
+# Directorio de trabajo
+WORKDIR /var/www/html
+
+# Copiar proyecto Symfony
+COPY ../gym /var/www/html
+
+# Instalar dependencias
+RUN composer install --no-interaction --optimize-autoloader
+
+# Dar permisos
+RUN chown -R www-data:www-data /var/www/html
 
 # Copiar configuración de Apache
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-
-# Asegurar permisos correctos para Apache
-RUN chown -R www-data:www-data /var/www/html
 
 # Exponer puerto 80
 EXPOSE 80
