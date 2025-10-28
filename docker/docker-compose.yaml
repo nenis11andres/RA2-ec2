@@ -3,20 +3,25 @@ version: "3.9"
 services:
   nginx:
     build:
-      context: ..       # apunta al directorio raíz del repositorio
+      context: ..
       dockerfile: docker/nginx/Dockerfile
     ports:
       - "8080:80"
     volumes:
-      - ../gym:/var/www/html
+      - ../gym/public:/var/www/html/public:ro
+      - ../gym/var:/var/www/html/var
+    environment:
+      - APP_ENV=prod
 
   apache:
     build:
-      context: ..       # apunta al directorio raíz del repositorio
+      context: ..
       dockerfile: docker/apache/Dockerfile
     ports:
       - "8081:80"
     volumes:
-      - ../gym:/var/www/html
-    # Nombre opcional para acceder más fácil
+      - ../gym/public:/var/www/html/public:ro
+      - ../gym/var:/var/www/html/var
     container_name: docker-apache
+    environment:
+      - APP_ENV=prod

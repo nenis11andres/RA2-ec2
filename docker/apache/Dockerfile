@@ -15,14 +15,17 @@ RUN a2enmod rewrite
 # Directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar proyecto Symfony
-COPY ../gym /var/www/html
+# Copiar solo composer.json y composer.lock para instalar dependencias
+COPY ../gym/composer.json ../gym/composer.lock ./
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Instalar dependencias
-RUN composer install --no-interaction --optimize-autoloader
+# Copiar resto del proyecto
+COPY ../gym/public ./public
+COPY ../gym/var ./var
 
 # Dar permisos
 RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
 
 # Copiar configuración de Apache
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
