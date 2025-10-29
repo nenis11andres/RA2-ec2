@@ -7,10 +7,9 @@ services:
       dockerfile: docker/nginx/Dockerfile
     ports:
       - "8080:80"
-    volumes:
-      - ../gym:/var/www/html
     environment:
       - APP_ENV=prod
+    restart: unless-stopped
 
   apache:
     build:
@@ -18,8 +17,6 @@ services:
       dockerfile: docker/apache/Dockerfile
     ports:
       - "8081:80"
-    volumes:
-      - ../gym:/var/www/html
-    container_name: docker-apache
     environment:
       - APP_ENV=prod
+    restart: unless-stopped
