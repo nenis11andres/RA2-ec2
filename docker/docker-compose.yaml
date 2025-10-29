@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "8080:80"
+      - "${NGINX_HOST_PORT:-8080}:80"
     environment:
       - APP_ENV=prod
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
       context: ..
       dockerfile: docker/apache/Dockerfile
     ports:
-      - "8081:80"
+      - "${APACHE_HOST_PORT:-8081}:80"
     environment:
       - APP_ENV=prod
     restart: unless-stopped

@@ -9,13 +9,13 @@ variable "aws_region" {
 variable "nginx_ami" {
   description = "AMI ID para Amazon Linux 2"
   type        = string
-  default     = "ami-0440d3b780d96b29d" # Amazon Linux 2023 en us-east-1
+  default     = "ami-07860a2d7eb515d9a" # Amazon Linux 2023 en us-east-1
 }
 
 variable "apache_ami" {
   description = "AMI ID para Debian"
   type        = string
-  default     = "ami-058bd2d568351da34" # Debian 12 en us-east-1
+  default     = "ami-0b0012dad04fbe3d7" # Debian 12 en us-east-1
 }
 
 # Tipo de instancia

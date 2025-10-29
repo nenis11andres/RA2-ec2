@@ -1,49 +1,63 @@
 #!/bin/bash
-set -eux
+# --------------------------------------------
+# Script de inicialización para Debian/Ubuntu
+# Instala Docker, Docker Compose, clona repo y levanta contenedor Apache
+# --------------------------------------------
 
-# Configurar logging
-LOG=/var/log/apache-userdata.log
-exec > >(tee -a ${LOG}) 2>&1
+set -e  # Salir si hay error
 
-echo "Inicio apache user-data"
+# Actualizar sistema e instalar dependencias
+apt-get update -y
+apt-get install -y ca-certificates curl gnupg lsb-release git
 
-# Actualizar e instalar utilidades
-apt-get update -y || true
-apt-get install -y git curl wget ca-certificates gnupg lsb-release || true
+# Instalar Docker siguiendo la guía oficial
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Instalar Docker (script oficial)
-curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
-sh /tmp/get-docker.sh
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io
 
-# Iniciar y habilitar Docker
-systemctl enable --now docker
+# Instalar Docker Compose manualmente (por si el paquete docker-compose-plugin falla)
+mkdir -p /usr/libexec/docker/cli-plugins/
+curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" \
+     -o /usr/libexec/docker/cli-plugins/docker-compose
+chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 
-# Instalar docker-compose (binario)
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+# Verificar instalación
+docker compose version
 
-# Añadir usuario admin al grupo docker
-groupadd -f docker || true
-usermod -aG docker admin || true
+# Habilitar y arrancar Docker
+systemctl enable docker
+systemctl start docker
 
-# Esperar a que Docker esté listo
-until docker info > /dev/null 2>&1; do
-  echo "Esperando a Docker..."
-  sleep 2
+# Agregar usuario admin al grupo docker
+usermod -aG docker admin
+
+# Esperar a que Docker esté activo
+until docker info >/dev/null 2>&1; do
+    echo "Esperando a que Docker esté listo..."
+    sleep 2
 done
 
-# Clonar repo (usuario admin)
-cd /home/admin
-rm -rf RA2-ec2
-git clone https://github.com/nenis11andres/RA2-ec2.git
-chown -R admin:admin RA2-ec2
+# Clonar el repositorio si no existe
+cd /home/admin || cd /root
+if [ ! -d "RA2-ec2" ]; then
+    git clone https://github.com/nenis11andres/RA2-ec2.git
+fi
+cd RA2-ec2/docker
 
-# Construir imagen y levantar contenedor apache usando docker-compose
-cd /home/admin/RA2-ec2/docker
-/usr/local/bin/docker-compose build --no-cache apache
-/usr/local/bin/docker-compose up -d --remove-orphans apache
+# Levantar contenedor Apache usando Docker Compose
+docker compose up -d apache || {
+    echo "Error levantando contenedor, mostrando logs..."
+    docker compose logs
+    exit 1
+}
 
-# Verificación final
-sleep 3
-docker ps -a
-echo "Fin apache user-data"
+# Dar permisos al usuario admin
+chown -R admin:admin /home/admin/RA2-ec2
+
+echo "¡Apache levantado correctamente!"
+docker compose ps
