@@ -8,7 +8,6 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ../gym/public:/var/www/html/public:ro
       - ../gym/var:/var/www/html/var
     environment:
       - APP_ENV=prod
@@ -20,7 +19,6 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ../gym/public:/var/www/html/public:ro
       - ../gym/var:/var/www/html/var
     container_name: docker-apache
     environment:

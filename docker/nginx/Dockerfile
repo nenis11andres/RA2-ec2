@@ -18,23 +18,19 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar solo composer.json y composer.lock para instalar dependencias
-COPY ../gym/composer.json ../gym/composer.lock ./
+# Copiar todo el proyecto Symfony
+COPY gym/ .
+
+# Instalar dependencias
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Copiar resto del proyecto
-COPY ../gym/public ./public
-COPY ../gym/var ./var
-
 # Dar permisos
-RUN chown -R nginx:nginx /var/www/html
-RUN chmod -R 755 /var/www/html
+RUN chown -R nginx:nginx /var/www/html && \
+    chmod -R 755 /var/www/html
 
 # Copiar configuración de Nginx
-COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Exponer puerto HTTP
 EXPOSE 80
 
-# Iniciar servicios
-CMD php-fpm && nginx -g 'daemon off;'
+CMD ["sh", "-c", "php-fpm && nginx -g 'daemon off;'"]

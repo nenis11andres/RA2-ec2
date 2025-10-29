@@ -1,26 +1,48 @@
 #!/bin/bash
 set -eux
 
-# Actualizar e instalar Docker y dependencias
-yum update -y
-yum install -y docker git
-systemctl start docker
-systemctl enable docker
+LOG=/var/log/nginx-userdata.log
+exec > >(tee -a ${LOG}) 2>&1
 
-# Instalar Docker Compose
-curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# Actualizar e instalar dependencias
+yum update -y
+yum install -y git curl
+
+# Instalar Docker usando script oficial
+curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+sh /tmp/get-docker.sh
+
+# Iniciar y habilitar Docker
+systemctl enable --now docker
+
+# Instalar docker-compose
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
-# Usuario ec2-user puede usar Docker
-usermod -aG docker ec2-user
+# Añadir usuario al grupo docker
+groupadd -f docker || true
+usermod -aG docker ec2-user || true
 
-# Clonar repositorio
+# Esperar a que Docker esté listo
+until docker info > /dev/null 2>&1; do
+  echo "Esperando a que Docker esté disponible..."
+  sleep 1
+done
+
+# Clonar repo
 cd /home/ec2-user
-git clone https://github.com/nenis11andres/RA2-ec2.git
+if [ ! -d "RA2-ec2" ]; then
+  git clone https://github.com/nenis11andres/RA2-ec2.git
+fi
+chown -R ec2-user:ec2-user RA2-ec2
 
-# Cambiar permisos de la carpeta gym para PHP-FPM
-chown -R ec2-user:ec2-user RA2-ec2/gym
+# Corregir .env
+sed -i 's/DATABASE_URL=.*/DATABASE_URL="mysql:\/\/root:@127.0.0.1:3306\/gymnasio?serverVersion=10.4.28-MariaDB\&charset=utf8mb4"/' /home/ec2-user/RA2-ec2/gym/.env
 
-# Levantar contenedor Nginx
-cd RA2-ec2/docker
-docker-compose up -d nginx
+# Construir y arrancar nginx
+cd /home/ec2-user/RA2-ec2/docker
+/usr/local/bin/docker-compose build --no-cache nginx
+/usr/local/bin/docker-compose up -d nginx
+
+# Mostrar estado
+docker ps -a
