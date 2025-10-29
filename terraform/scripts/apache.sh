@@ -1,48 +1,36 @@
 #!/bin/bash
 set -eux
 
+# Configurar logging
 LOG=/var/log/apache-userdata.log
 exec > >(tee -a ${LOG}) 2>&1
 
-# Actualizar e instalar dependencias
+# Actualizar e instalar Docker
 apt-get update -y
-apt-get install -y git curl ca-certificates
+apt-get install -y docker.io docker-compose git
+systemctl start docker
+systemctl enable docker
 
-# Instalar Docker usando script oficial
-curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
-sh /tmp/get-docker.sh
-
-# Iniciar y habilitar Docker
-systemctl enable --now docker
-
-# Instalar docker-compose
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-
-# Añadir usuario admin al grupo docker
-groupadd -f docker || true
-usermod -aG docker admin || true
+# Configurar permisos Docker
+usermod -aG docker admin
+systemctl restart docker
 
 # Esperar a que Docker esté listo
 until docker info > /dev/null 2>&1; do
   echo "Esperando a que Docker esté disponible..."
-  sleep 1
+  sleep 5
 done
 
-# Clonar repo
+# Clonar repositorio
 cd /home/admin
-if [ ! -d "RA2-ec2" ]; then
-  git clone https://github.com/nenis11andres/RA2-ec2.git
-fi
+rm -rf RA2-ec2
+git clone https://github.com/nenis11andres/RA2-ec2.git
 chown -R admin:admin RA2-ec2
 
-# Corregir .env
-sed -i 's/DATABASE_URL=.*/DATABASE_URL="mysql:\/\/root:@127.0.0.1:3306\/gymnasio?serverVersion=10.4.28-MariaDB\&charset=utf8mb4"/' /home/admin/RA2-ec2/gym/.env
+# Construir y ejecutar contenedor
+cd RA2-ec2/docker
+docker-compose build --no-cache apache
+docker-compose up -d apache
 
-# Construir y arrancar apache
-cd /home/admin/RA2-ec2/docker
-/usr/local/bin/docker-compose build --no-cache apache
-/usr/local/bin/docker-compose up -d apache
-
-# Mostrar estado
-docker ps -a
+# Verificar estado
+docker ps
