@@ -15,11 +15,11 @@ RUN a2enmod rewrite
 # Directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar todo el proyecto Symfony
+# Copiar proyecto Symfony
 COPY gym/ .
 
 # Instalar dependencias
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader
 
 # Dar permisos
 RUN chown -R www-data:www-data /var/www/html && \

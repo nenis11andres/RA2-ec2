@@ -11,9 +11,11 @@ apt-get install -y docker.io docker-compose git
 systemctl start docker
 systemctl enable docker
 
-# Configurar permisos Docker
+# Configurar permisos Docker y usuario
+groupadd -f docker
 usermod -aG docker admin
 systemctl restart docker
+newgrp docker
 
 # Esperar a que Docker esté listo
 until docker info > /dev/null 2>&1; do
@@ -29,8 +31,8 @@ chown -R admin:admin RA2-ec2
 
 # Construir y ejecutar contenedor
 cd RA2-ec2/docker
-docker-compose build --no-cache apache
-docker-compose up -d apache
+sudo -u admin /usr/local/bin/docker-compose build --no-cache apache
+sudo -u admin /usr/local/bin/docker-compose up -d apache
 
 # Verificar estado
 docker ps

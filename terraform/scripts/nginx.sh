@@ -17,9 +17,11 @@ systemctl enable docker
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
-# Configurar permisos Docker
+# Configurar permisos Docker y usuario
+groupadd -f docker
 usermod -aG docker ec2-user
 systemctl restart docker
+newgrp docker
 
 # Esperar a que Docker esté listo
 until docker info > /dev/null 2>&1; do
@@ -35,8 +37,8 @@ chown -R ec2-user:ec2-user RA2-ec2
 
 # Construir y ejecutar contenedor
 cd RA2-ec2/docker
-docker-compose build --no-cache nginx
-docker-compose up -d nginx
+sudo -u ec2-user /usr/local/bin/docker-compose build --no-cache nginx
+sudo -u ec2-user /usr/local/bin/docker-compose up -d nginx
 
 # Verificar estado
 docker ps

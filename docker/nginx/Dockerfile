@@ -18,11 +18,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar todo el proyecto Symfony
+# Copiar proyecto Symfony
 COPY gym/ .
 
 # Instalar dependencias
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader
 
 # Dar permisos
 RUN chown -R nginx:nginx /var/www/html && \
